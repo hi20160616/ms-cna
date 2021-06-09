@@ -1,0 +1,16 @@
+{
+  "dbpath":"db",
+  "microservice":{
+    "title":"cna",
+    "domain":"www.cna.com",
+    "url":[
+      "https://www.cna.com/realtime/world",
+      "https://www.cna.com/news/world",
+      "https://www.cna.com/realtime/china",
+      "https://www.cna.com/news/china"
+    ],
+    "addr":":10002",
+    "timeout":"1s",
+    "heartbeat":"5m"
+  }
+}
