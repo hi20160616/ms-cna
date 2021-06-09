@@ -147,8 +147,22 @@ func (a *Article) fetchTitle() (string, error) {
 		return "", fmt.Errorf("[%s] getTitle error, there is no element <title>", configs.Data.MS.Title)
 	}
 	title := n[0].FirstChild.Data
-	rp := strings.NewReplacer(" | 联合早报网", "", " | 早报", "")
-	title = strings.TrimSpace(rp.Replace(title))
+	if strings.Contains(title, "| 娛樂 |") ||
+		strings.Contains(title, "| 政治 |") ||
+		strings.Contains(title, "| 兩岸 |") ||
+		strings.Contains(title, "| 運動 |") ||
+		strings.Contains(title, "| 文化 |") ||
+		strings.Contains(title, "| 地方 |") ||
+		strings.Contains(title, "| 社會 |") ||
+		strings.Contains(title, "| 生活 |") ||
+		strings.Contains(title, "| 科技 |") ||
+		strings.Contains(title, "| 證券 |") ||
+		strings.Contains(title, "| 產經 |") {
+		return "", fmt.Errorf("[%s] ignore post on purpose: %s",
+			configs.Data.MS.Title, a.U.String())
+	}
+	title = strings.ReplaceAll(title, " | 中央社 CNA", "")
+	title = strings.TrimSpace(title)
 	gears.ReplaceIllegalChar(&title)
 	return title, nil
 }
@@ -157,9 +171,21 @@ func (a *Article) fetchUpdateTime() (*timestamppb.Timestamp, error) {
 	if a.raw == nil {
 		return nil, errors.Errorf("[%s] fetchUpdateTime: raw is nil: %s", configs.Data.MS.Title, a.U.String())
 	}
-	re := regexp.MustCompile(`"datePublished": "(.*?)",`)
-	rs := re.FindAllSubmatch(a.raw, -1)[0]
-	t, err := time.Parse(time.RFC3339, string(rs[1]))
+	metas := exhtml.MetasByItemprop(a.doc, "dateModified")
+	cs := []string{}
+	for _, meta := range metas {
+		for _, a := range meta.Attr {
+			if a.Key == "content" {
+				cs = append(cs, a.Val)
+			}
+		}
+	}
+	if len(cs) <= 0 {
+		return nil, fmt.Errorf("[%s] no date extracted: %s",
+			configs.Data.MS.Title, a.U.String())
+	}
+	// China doesn't have daylight saving. It uses a fixed 8 hour offset from UTC.
+	t, err := time.Parse("2006/01/02 15:04", cs[0])
 	if err != nil {
 		return nil, err
 	}
@@ -198,34 +224,32 @@ func (a *Article) fetchContent() (string, error) {
 	if a.doc == nil {
 		return "", errors.Errorf("[%s] fetchContent: doc is nil: %s", configs.Data.MS.Title, a.U.String())
 	}
+	doc := a.doc
 	body := ""
 	// Fetch content nodes
-	nodes := exhtml.ElementsByTagAndId(a.doc, "article", "article-body")
+	nodes := exhtml.ElementsByTagAndClass(doc, "div", "paragraph")
 	if len(nodes) == 0 {
-		nodes = exhtml.ElementsByTagAndClass(a.doc, "div", "article-content-rawhtml")
+		return "", fmt.Errorf("[%s] There is no element class is paragraph` from: %s",
+			configs.Data.MS.Title, a.U.String())
 	}
-	if len(nodes) == 0 {
-		nodes = exhtml.ElementsByTagAndClass(a.doc, "div", "article-content-container")
-	}
-	if len(nodes) == 0 {
-		return "", errors.Errorf("[%s] no content extract from %s", configs.Data.MS.Title, a.U.String())
-	}
-	plist := exhtml.ElementsByTag(nodes[0], "p")
+	n := nodes[0]
+	plist := exhtml.ElementsByTag(n, "h2", "p")
 	for _, v := range plist {
-		if v.FirstChild == nil {
-			continue
-		} else if v.FirstChild.FirstChild != nil &&
-			v.FirstChild.Data == "strong" {
-			a := exhtml.ElementsByTag(v, "span")
-			for _, aa := range a {
-				body += aa.FirstChild.Data
-			}
-			body += "  \n"
-		} else {
+		if v.FirstChild != nil {
 			body += v.FirstChild.Data + "  \n"
 		}
 	}
-	body = strings.ReplaceAll(body, "span  \n", "")
+	replace := func(src, x, y string) string {
+		re := regexp.MustCompile(x)
+		return re.ReplaceAllString(src, y)
+	}
+
+	body = replace(body, "「", "“")
+	body = replace(body, "」", "”")
+	body = replace(body, "</a>", "")
+	body = replace(body, `<a.*?>`, "")
+	body = replace(body, `<script.*?</script>`, "")
+	body = replace(body, `<iframe.*?</iframe>`, "")
 
 	return body, nil
 }

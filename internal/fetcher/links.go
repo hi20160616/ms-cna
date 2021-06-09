@@ -22,11 +22,12 @@ func fetchLinks() ([]string, error) {
 		}
 		rt = append(rt, links...)
 	}
-	newsWorld := linksFilter(rt, `.*?/news/world/.*`)
-	newsChina := linksFilter(rt, `.*?/news/china/.*`)
-	realtimeWorld := linksFilter(rt, `.*?/realtime/world/.*`)
-	realtimeChina := linksFilter(rt, `.*?/realtime/china/.*`)
-	rt = append(append(append(newsWorld, newsChina...), realtimeWorld...), realtimeChina...)
+	newsFirst := linksFilter(rt, `.*?/news/firstnews/.*`)
+	newsWorld := linksFilter(rt, `.*?/news/aopl/.*`)
+	// TODO: ignore aipl and acn but this still fetch links?
+	newsPolitical := linksFilter(rt, `.*?/news/aipl/.*`)
+	newsTW := linksFilter(rt, `.*?/news/acn/.*`)
+	rt = append(append(append(newsFirst, newsWorld...), newsPolitical...), newsTW...)
 	return rt, nil
 }
 

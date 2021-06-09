@@ -16,8 +16,7 @@ func TestFetchArticle(t *testing.T) {
 		url string
 		err error
 	}{
-		{"https://www.cna.com/realtime/world/story20210602-1151196", ErrTimeOverDays},
-		{"https://www.cna.com/realtime/world/story20210607-1153241", nil},
+		{"https://www.cna.com.tw/news/aopl/202106090021.aspx", nil},
 	}
 	for _, tc := range tests {
 		a := NewArticle()
@@ -39,8 +38,7 @@ func TestFetchTitle(t *testing.T) {
 		url   string
 		title string
 	}{
-		{"https://www.cna.com/realtime/world/story20210602-1151196", "马国男子腰缠巨蟒骑摩托车送往放生引热议"},
-		{"https://www.cna.com/realtime/world/story20210607-1153241", "以色列将于14日前投票批准新政府"},
+		{"https://www.cna.com.tw/news/aopl/202106090021.aspx", "疫情照出政治分歧 美國8旬防疫隊長佛奇挺過風暴"},
 	}
 	for _, tc := range tests {
 		a := NewArticle()
@@ -76,12 +74,8 @@ func TestFetchUpdateTime(t *testing.T) {
 		want string
 	}{
 		{
-			"https://www.cna.com/realtime/world/story20210602-1151196",
+			"https://www.cna.com.tw/news/aopl/202106090021.aspx",
 			"2021-06-02 15:44:33 +0800 UTC",
-		},
-		{
-			"https://www.cna.com/realtime/world/story20210607-1153241",
-			"2021-06-07 21:38:53 +0800 UTC",
 		},
 	}
 	var err error
@@ -119,12 +113,8 @@ func TestFetchContent(t *testing.T) {
 		want string
 	}{
 		{
-			"https://www.cna.com/realtime/world/story20210602-1151196",
+			"https://www.cna.com.tw/news/aopl/202106090021.aspx",
 			"2021-06-02 15:44:33 +0800 UTC",
-		},
-		{
-			"https://www.cna.com/realtime/world/story20210607-1153241",
-			"2021-06-07 21:38:53 +0800 UTC",
 		},
 	}
 	var err error

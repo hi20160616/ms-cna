@@ -4,12 +4,9 @@
     "title":"cna",
     "domain":"www.cna.com",
     "url":[
-      "https://www.cna.com/realtime/world",
-      "https://www.cna.com/news/world",
-      "https://www.cna.com/realtime/china",
-      "https://www.cna.com/news/china"
+      "https://www.cna.com.tw/list/aopl.aspx"
     ],
-    "addr":":10002",
+    "addr":":10006",
     "timeout":"1s",
     "heartbeat":"5m"
   }
