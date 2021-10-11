@@ -6,7 +6,7 @@
     "url":[
       "https://www.cna.com.tw/list/aopl.aspx"
     ],
-    "addr":":10006",
+    "addr":":10003",
     "timeout":"1s",
     "heartbeat":"5m"
   }
